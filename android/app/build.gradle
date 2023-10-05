@@ -24,8 +24,9 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.form"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 33
     ndkVersion flutter.ndkVersion
+    buildToolsVersion "30.0.2"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

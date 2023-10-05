@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'data_display_screen.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:form/index.dart';
 
 class InputFormScreen extends StatefulWidget {
   @override
@@ -19,6 +16,15 @@ class _InputFormScreenState extends State<InputFormScreen> {
   String? _gender;
   String? _address;
   File? _image;
+
+  void _handlePickedImage(XFile? pickedFile) {
+    if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+      setState(() {
+        _image = imageFile;
+      });
+    }
+  }
 
 
   bool isValidDate(String date) {
@@ -131,13 +137,22 @@ class _InputFormScreenState extends State<InputFormScreen> {
                 },
               ),
 
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: 'Gender'),
+              
+              Container(
+                child: Row(
+    children: [
+      Expanded(
+        child: DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            labelText: 'Gender',
+            isDense: true, // Reduces padding
+          ),
                 value: _gender,
                 items: genderOptions.map((gender) {
                   return DropdownMenuItem<String>(
                   value: gender,
                   child: Text(gender),
+                  
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -153,9 +168,14 @@ class _InputFormScreenState extends State<InputFormScreen> {
           },
           onSaved: (value) {
             _gender = value;
+
           },
         ),
-
+      ),
+    ],
+  ),
+),
+              
         TextFormField(
           decoration: InputDecoration(labelText: 'Address'),
             validator: (value) {
@@ -171,13 +191,57 @@ class _InputFormScreenState extends State<InputFormScreen> {
         
         GestureDetector(
   onTap: () async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final cameraPermission = await Permission.camera.request();
+    final galleryPermission = await Permission.storage.request();
 
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
+    if ( cameraPermission.isGranted && galleryPermission.isGranted) {
+    // Display a dialog or bottom sheet with options
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Choose an option"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.camera),
+                title: Text("Take a Photo"),
+                onTap: () async {
+                  Navigator.of(context).pop(); // Close the dialog
+                  final pickedFile = await ImagePicker().pickImage(
+                    source: ImageSource.camera,
+                  );
+                  _handlePickedImage(pickedFile);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo),
+                title: Text("Pick from Gallery"),
+                onTap: () async {
+                  Navigator.of(context).pop(); // Close the dialog
+                  final pickedFile = await ImagePicker().pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  _handlePickedImage(pickedFile);
+                },
+              ),
+            ],
+          ),
+        ),
+      );  
+  }else {
+    // Handle permissions not granted
+      if (cameraPermission.isDenied) {
+        // Handle the case when camera permission is denied
+      }
+      if (galleryPermission.isDenied) {
+        // Handle the case when gallery permission is denied
+      }
+  }
+
+ 
+
+
   },
   child: Column(
     children: <Widget>[
@@ -192,6 +256,7 @@ class _InputFormScreenState extends State<InputFormScreen> {
       Text('Add Profile Picture'),
     ],
   ),
+  
 ),
 
 

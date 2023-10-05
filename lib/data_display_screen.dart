@@ -1,6 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/material.dart';
+import 'package:form/index.dart';
 
 class DataDisplayScreen extends StatelessWidget {
   final String fullName;
